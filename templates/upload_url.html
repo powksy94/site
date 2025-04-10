@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification URL</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Vérification de l'URL</h1>
+
+        {% if status == "success" %}
+            <p class="success-message">{{ message }}</p>
+            <ul style="text-align: left; padding-left: 1.5rem;">
+                <li>🖥️ Fichier .exe trouvé : {{ result.exe }}</li>
+                <li>📱 Fichier .apk trouvé : {{ result.apk }}</li>
+                <li>📦 Fichier .msi trouvé : {{ result.msi }}</li>
+                <li>⚙️ Fichier .bat trouvé : {{ result.bat }}</li>
+            </ul>
+        {% elif status == "error" %}
+            <p class="error-message">{{ message }}</p>
+        {% endif %}
+
+        <!-- Vérification du Domaine -->
+        {% if domain_message %}
+            <p class="{{ 'success-message' if domain_valid else 'error-message' }}">
+                {{ domain_message }}
+            </p>
+        {% endif %}
+        
+        <!-- Lien vers les logs -->
+        <a href="{{ url_for('logs') }}" class="btn">Voir les logs</a>
+        
+        <a href="/">Retour à l'accueil</a>
+    </div>
+</body>
+</html>

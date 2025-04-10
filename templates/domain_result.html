@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultat de la vérification du domaine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f4f4f4;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Vérification du Domaine</h1>
+    <div class="result">
+        {% if is_valid %}
+            <p class="success">Le domaine est valide : {{ message }}</p>
+        {% else %}
+            <p class="error">Le domaine est invalide : {{ message }}</p>
+        {% endif %}
+    </div>
+    <a href="/" class="btn">Retour à l'accueil</a>
+</body>
+</html>

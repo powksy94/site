@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Logs de fichiers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #00c9ff;
+            color: white;
+        }
+
+        .delete-form {
+            margin-top: 20px;
+            margin-bottom: 20px; /* Ajout d'un espacement entre le bouton de suppression et le bouton retour */
+        }
+
+        .delete-form button {
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .delete-form button:hover {
+            background-color: darkred;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #00c9ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px; /* Espacement entre les boutons */
+        }
+
+        .btn:hover {
+            background-color: #00a1cc;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Historique des traitements de fichiers</h1>
+
+        <!-- Affichage des logs -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Source</th>
+                    <th>Nom du fichier / URL</th>
+                    <th>.exe</th>
+                    <th>.apk</th>
+                    <th>.msi</th>
+                    <th>.bat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ log.source }}</td>
+                    <td>{{ log.filename }}</td>
+                    <td>{{ '✔️' if log.exe_found else '❌' }}</td>
+                    <td>{{ '✔️' if log.apk_found else '❌' }}</td>
+                    <td>{{ '✔️' if log.msi_found else '❌' }}</td>
+                    <td>{{ '✔️' if log.bat_found else '❌' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Formulaire pour effacer les logs -->
+        <div class="delete-form">
+            <form action="{{ url_for('clear_logs') }}" method="POST">
+                <button type="submit">Effacer les logs</button>
+            </form>
+        </div>
+
+        <!-- Bouton retour à l'accueil -->
+        <a href="/" class="btn">Retour à l'accueil</a>
+    </div>
+</body>
+</html>

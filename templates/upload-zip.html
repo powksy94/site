@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>upload zip</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Résultats fichier zip</h1>
+
+        {% if status == "success" %}
+            <p style="color: green;">{{ message }}</p>
+            <ul>
+                <li>🖥️ Fichier .exe trouvé : {{ result.exe }}</li>
+                <li>📱 Fichier .apk trouvé : {{ result.apk }}</li>
+                <li>📦 Fichier .msi trouvé : {{ result.msi }}</li>
+                <li>⚙️ Fichier .bat trouvé : {{ result.bat }}</li>
+            </ul>
+        {% else %}
+            <p style="color: red;">{{ message }}</p>
+        {% endif %}
+
+        <a href="/">Retour à l'accueil</a>
+        <a href="{{ url_for('logs') }}" class="btn">Voir les logs</a>
+    </div>
+</body>
+</html>

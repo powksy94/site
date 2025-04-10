@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>File Analyse</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <!-- Barre de navigation -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="/">File Analyse</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/">Accueil</a></li>
+      <li><a href="/services">Services</a></li>
+      <li><a href="{{ url_for('about') }}">À propos</a></li>
+    </ul>
+    <div class="menu-toggle">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </nav>
+
+  <div class="form-toggle-container">
+    <button onclick="toggleForm('hero-content-zip')" id="toggle-btn" class="btn">📁 Upload ZIP</button>
+    <button onclick="toggleForm('hero-content-url')" id="toggle-btn" class="btn">🌐 Coller une URL</button>
+  </div>
+
+  <div class="hero">
+    <div class="hero-content" id="hero-content-zip" style="display: none;">
+      <h1>🕵️ Analyseur de fichiers intelligent</h1>
+      <p>Détectez un dossier ZIP contenant des fichiers .exe ou .apk en un clic.</p>
+
+      <!-- Formulaire d'upload -->
+      <form action="/upload-zip" method="POST" enctype="multipart/form-data">
+        <label for="file" class="file-label">Choisissez un fichier à analyser </label>
+        <input type="file" name="file" id="file" class="file-input" accept=".zip, .apk, .exe" required>
+        <br>
+        <button type="submit" class="btn">Commencer l'analyse</button>
+      </form>
+      <br>
+    </div>
+    <div class="hero-content" id="hero-content-url" style="display: none;">
+      <h1>🕵️ Analyseur de fichiers intelligent</h1>
+      <p>Détectez un url contenant des fichiers .exe ou .apk en un clic.</p>
+      <!-- Formulaire d'upload -->
+      <form action="/upload-url" method="POST" enctype="multipart/form-data">
+        <input type="text" name="url" id="url" placeholder="Entrez l'URL du site" required>
+        <br>
+        <button type="submit" class="btn">Commencer l'analyse</button>
+      </form>
+    </div>
+  </div>
+ 
+  <script>
+    let currentVisible = null;
+  
+    function toggleForm(divId) {
+      const target = document.getElementById(divId);
+  
+      if (currentVisible === divId) {
+        target.style.display = 'none';
+        currentVisible = null;
+      } else {
+        document.getElementById("hero-content-zip").style.display = 'none';
+        document.getElementById("hero-content-url").style.display = 'none';
+        target.style.display = 'block';
+        currentVisible = divId;
+      }
+    }
+  
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+  
+    // ✅ On utilise une classe sur le <body> pour faire les ajustements en CSS
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      document.body.classList.toggle('menu-open');
+    });
+  </script>
+  
+
+</body>
+<footer>
+  <p>&copy; 2025 File Analyse Tous droits réservés.</p>
+</footer>
+
+</html>
