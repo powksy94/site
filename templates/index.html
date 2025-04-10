@@ -16,7 +16,8 @@
     <ul class="nav-links">
       <li><a href="/">Accueil</a></li>
       <li><a href="/services">Services</a></li>
-      <li><a href="{{ url_for('about') }}">À propos</a></li>
+      <li><a href="{{ url_for('about') }}">🧑‍💻À propos</a></li>
+      <li><a href="#Good_pratices">🔒 Bonne pratiques</a></li>
     </ul>
     <div class="menu-toggle">
       <span class="bar"></span>
@@ -33,7 +34,7 @@
   <div class="hero">
     <div class="hero-content" id="hero-content-zip" style="display: none;">
       <h1>🕵️ Analyseur de fichiers intelligent</h1>
-      <p>Détectez un dossier ZIP contenant des fichiers .exe ou .apk en un clic.</p>
+      <p>Détectez un dossier ZIP contenant des fichiers .exe, .bat , .msi ou .apk en un clic.</p>
 
       <!-- Formulaire d'upload -->
       <form action="/upload-zip" method="POST" enctype="multipart/form-data">
@@ -46,7 +47,7 @@
     </div>
     <div class="hero-content" id="hero-content-url" style="display: none;">
       <h1>🕵️ Analyseur de fichiers intelligent</h1>
-      <p>Détectez un url contenant des fichiers .exe ou .apk en un clic.</p>
+      <p>Détectez un url contenant des fichiers .exe, .bat , .msi ou .apk en un clic.</p>
       <!-- Formulaire d'upload -->
       <form action="/upload-url" method="POST" enctype="multipart/form-data">
         <input type="text" name="url" id="url" placeholder="Entrez l'URL du site" required>
@@ -56,6 +57,9 @@
     </div>
   </div>
  
+  <Section id="Good_pratices">
+
+  </Section>
   <script>
     let currentVisible = null;
   
