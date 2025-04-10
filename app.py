@@ -100,8 +100,11 @@ def get_domain_from_url(url):
         domain = domain[4:]
     return domain
 
-
 @app.route('/')
+def homepage():
+    return render_template('Homepage.html')
+
+@app.route('/index')
 def index():
     return render_template('index.html')
 

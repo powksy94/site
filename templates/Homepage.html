@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Page d'Accueil</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <!-- Barre de navigation -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="/">File Analyse</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/">Accueil</a></li>
+      <li><a href="/services">Services</a></li>
+      <li><a href="{{ url_for('about') }}">🧑‍💻À propos</a></li>
+      <li><a href="#Good_pratices">🔒 Bonne pratiques</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero">
+    <h1>Bienvenue sur File Analyse</h1>
+    <p>Choisissez une option pour commencer l'analyse de vos fichiers ou accéder aux outils réservés aux développeurs.</p>
+    
+    <!-- Deux boutons pour rediriger -->
+    <div class="button-container">
+      <button onclick="window.location.href='/analyze-data'" class="btn">🔍 Accéder à l'analyse de données (Développeurs)</button>
+      <button onclick="window.location.href='/index'" class="btn">👤 Accéder à la page principale</button>
+    </div>
+  </div>
+
+
+  <script>const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelector('.nav-links');
+
+  // ✅ On utilise une classe sur le <body> pour faire les ajustements en CSS
+  menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    document.body.classList.toggle('menu-open');
+  });
+</script>
+  <footer>
+    <p>&copy; 2025 File Analyse Tous droits réservés.</p>
+  </footer>
+
+</body>
+
+</html>
