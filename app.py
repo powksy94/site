@@ -104,6 +104,10 @@ def get_domain_from_url(url):
 def homepage():
     return render_template('Homepage.html')
 
+@app.route('/analyze_data')
+def analyzedata():
+    return render_template('analyze_requets.html')
+
 @app.route('/index')
 def index():
     return render_template('index.html')
