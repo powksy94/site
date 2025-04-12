@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse Réseaux Sociaux</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="/">File Analyse</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">🏠Accueil</a></li>
+            <li><a href="/services">Services</a></li>
+            <li><a href="{{ url_for('about') }}">🧑‍💻À propos</a></li>
+            <li><a href="#Good_pratices">🔒 Bonne pratiques</a></li>
+        </ul>
+        <div class="menu-toggle">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>🔍 Analyse des Requêtes Réseaux Sociaux</h1>
+        <p>Entrez une URL d'API (ex: `https://graph.facebook.com`) à interroger :</p>
+
+        <form action="/analyze-url" method="POST" class="form-section">
+            <input type="text" name="target_url" placeholder="https://api.twitter.com/..." required>
+            <button type="submit" class="btn">🚀 Lancer la requête</button>
+        </form>
+
+        <hr style="margin: 2rem 0; width: 60%; border-color: #00ffe1;">
+
+        <h2>📊 Historique des Requêtes</h2>
+        <input type="text" id="filterInput" placeholder="🔎 Filtrer par URL..."
+            style="padding:10px; width:80%; max-width:500px; margin-bottom:20px;">
+
+        <table id="logTable" style="width:90%; border-collapse:collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #00ffe1;">
+                    <th>Date</th>
+                    <th>URL</th>
+                    <th>Code</th>
+                    <th>Méthode</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.url }}</td>
+                    <td>{{ log.status_code }}</td>
+                    <td>{{ log.method }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <script>
+        const input = document.getElementById('filterInput');
+        input.addEventListener('keyup', function () {
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('#logTable tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        });
+    </script>
+
+    <footer>
+        <p>&copy; 2025 File Analyse Tous droits réservés.</p>
+    </footer>
+</body>
+
+</html>

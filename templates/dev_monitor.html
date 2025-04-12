@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>🔍 Dev Monitor</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { background: #111; color: #0f0; font-family: monospace; padding: 20px; }
+        .log { border-bottom: 1px solid #444; margin-bottom: 10px; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h2>📡 Surveillance des requêtes en direct</h2>
+    <div id="logs"></div>
+
+    <script>
+        const socket = io();
+        const logs = document.getElementById('logs');
+
+        socket.on('http_request', function(data) {
+            const el = document.createElement('div');
+            el.className = 'log';
+            el.innerHTML = `
+                <b>${data.method}</b> <code>${data.path}</code><br>
+                <small>IP: ${data.ip}</small><br>
+                <pre>${JSON.stringify(data.headers, null, 2)}</pre>
+            `;
+            logs.prepend(el);
+        });
+    </script>
+</body>
+</html>

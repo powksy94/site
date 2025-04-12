@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Se connecter</title>
+</head>
+<body>
+    <h2>Connexion</h2>
+    <form action="{{ url_for('login') }}" method="POST">
+        <label for="username">Nom d'utilisateur:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Mot de passe:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Se connecter">
+    </form>
+</body>
+</html>
