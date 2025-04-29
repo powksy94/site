@@ -1,6 +1,7 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, flash,  request, render_template, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate  # Import de Migrate
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import zipfile
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
@@ -18,6 +19,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///logs.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 socketio = SocketIO(app)
 app.secret_key = os.urandom(24)  # Clé secrète pour sécuriser les sessions
+# Clé secrète pour signer les jetons
+app.config['JWT_SECRET_KEY'] = 'votre_clé_secrète'
+
+# Initialiser JWT Manager
+jwt = JWTManager(app)
 
 
 db = SQLAlchemy(app)
@@ -50,6 +56,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(50), nullable=False, default='user') # add role
 
     # Méthode pour vérifier le mot de passe haché
     def check_password(self, password):
@@ -134,16 +141,21 @@ def get_domain_from_url(url):
     return domain
 
 # Ajout d'un utilisateur avec un mot de passe haché
-def add_user(username, password):
-    # Hachage du mot de passe avec pbkdf2:sha256
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256:100000', salt_length=16)
-    print(f"Mot de passe haché: {hashed_password}")
+def add_user(username, password, role='user'):
+    # Vérifier si l'utilisateur existe déjà
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        print(f"L'utilisateur '{username}' existe déjà.")
+        return  # On arrête ici sans recréer
 
-    conn = sqlite3.connect('logs.db')
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
-    conn.commit()
-    conn.close()
+    # Hachage du mot de passe
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256:100000', salt_length=16)
+
+    # Ajouter l'utilisateur
+    new_user = User(username=username, password=hashed_password, role=role)
+    db.session.add(new_user)
+    db.session.commit()
+    print(f"Utilisateur '{username}' créé avec succès !")
 
 # Fonction de vérification de l'utilisateur avec un mot de passe
 def verify_user(username, password):
@@ -159,10 +171,12 @@ def verify_user(username, password):
 
 # Initialisation de la base de données
 with app.app_context():
+    # Exemple d'ajout d'un utilisateur
+    add_user('admin', 'password123', role='admin')
+    add_user('jean', 'monmotdepasse')
     db.create_all()
     
-# Exemple d'ajout d'un utilisateur
-add_user('admin', 'password123')
+
 
 # Exemple de vérification du mot de passe
 username = 'admin'
@@ -173,12 +187,7 @@ if verify_user(username, password):
 else:
     print("Le mot de passe est incorrect!")
 
-@app.route('/')
-def home():
-    if 'username' in session:
-        return redirect(url_for('analyze_data'))
-    return render_template('Homepage.html')
-
+# Endpoint pour se connecter et obtenir un jeton JWT
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -188,36 +197,97 @@ def login():
         # Vérifier si l'utilisateur existe dans la base de données
         user = User.query.filter_by(username=username).first()
 
-        if user and user.check_password(password):
-            session['username'] = username  # Sauvegarder l'utilisateur dans la session
-            return redirect(url_for('analyze_data'))
+        if user:
+            # Vérifier si le mot de passe est correct
+            if check_password_hash(user.password, password):  # Utilisez check_password_hash pour vérifier le mot de passe
+                # Générer un jeton JWT pour cet utilisateur
+                access_token = create_access_token(identity=username)
+
+                # Vérifier le rôle de l'utilisateur
+                if user.role == 'admin':
+                    flash('Connexion réussie en tant qu\'administrateur !', 'success')
+                else:
+                    flash('Connexion réussie en tant qu\'utilisateur !', 'success')
+
+                # Renvoie le jeton JWT dans la réponse
+                return jsonify(access_token=access_token), 200  # Renvoyer le jeton JWT
+
+            else:
+                flash('Mot de passe incorrect', 'danger')
+                return redirect(url_for('login'))  # Rediriger vers la page de login avec un message d'erreur
         else:
-            return "Échec de la connexion. Essayez à nouveau."
-    
-    return render_template('login.html')  # Afficher le formulaire de connexion si la méthode est GET
+            flash('Nom d\'utilisateur non trouvé', 'danger')
+            return redirect(url_for('login'))  # Rediriger vers la page de login avec un message d'erreur
+
+    # Afficher le formulaire de connexion si la méthode est GET
+    return render_template('login.html')
+
+@app.route('/login.html')
+def login_page():
+    return render_template('login.html')
+
+from flask import request, jsonify, render_template
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 @app.route('/analyze_data')
 def analyze_data():
-    if 'username' not in session:
-        return redirect(url_for('login'))  # Rediriger vers la page de connexion si non connecté
-    
-    # Connexion à la base de données pour récupérer les logs
-    conn = get_db_connection()
-    logs = conn.execute('SELECT * FROM logs ORDER BY timestamp DESC').fetchall()
-    conn.close()
+    """Route principale pour l'analyse des données."""
 
-    # Retourner le rendu de la page avec les logs
-    return render_template('analyze_data.html', logs=logs)
+    # Accès local : pas besoin de JWT
+    if request.remote_addr == '127.0.0.1' or request.host.startswith('localhost'):
+        logs = fetch_logs()
+        return render_template('analyze_data.html', logs=logs)
+
+    # Accès distant : vérification JWT
+    try:
+        verify_jwt_in_request()
+        logs = fetch_logs()
+        return render_template('analyze_data.html', logs=logs)
+    except Exception:
+        return jsonify({"error": "Jeton invalide ou accès non autorisé"}), 401
+
+def fetch_logs():
+    return Log.query.order_by(Log.timestamp.desc()).all()
+
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)  # Déconnecter l'utilisateur
     return redirect(url_for('home'))
 
+# Exemple de données utilisateur
+users = {
+    "admin": {
+        "username": "admin",
+        "role": "administrator",
+        "email": "admin@example.com"
+    }
+}
+
+@app.route('/api/user', methods=['GET'])
+def get_user_info():
+    # Vérification de l'adresse IP du client
+    client_ip = request.remote_addr
+    if client_ip != '127.0.0.1':  # Permet l'accès uniquement à partir de localhost
+        return jsonify({"error": "Accès interdit à cette ressource."}), 403
+
+    # Si l'utilisateur est authentifié, retourner les données de l'utilisateur
+    token = request.headers.get('Authorization')
+    if token:
+        # Exemple de vérification de jeton (pour simplifier ici)
+        if token == "Bearer fake_jwt_token_for_localhost":  # Exemples de jeton à vérifier
+            user_data = users.get("admin")
+            return jsonify(user_data)
+        else:
+            return jsonify({"error": "Jeton invalide ou manquant"}), 401
+    else:
+        return jsonify({"error": "Jeton manquant"}), 401
+
 
 @app.route('/')
 def homepage():
-    return render_template('Homepage.html')
+    # Cette route n'a pas besoin de vérifier le jeton JWT
+    return render_template('/Homepage.html')
 
 
 @app.route('/analyze-url', methods=['POST'])
@@ -244,12 +314,27 @@ def analyze_url():
 def index():
     return render_template('index.html')
 
-@app.route('/dev-monitor')
+# Fonction pour vérifier le jeton (pour simplification)
+def verify_token(token):
+    return token == "Bearer fake_jwt_token_for_localhost"
+
+@app.route('/dev_monitor', methods=['GET'])
 def dev_monitor():
-    if request.remote_addr != '127.0.0.1':  # ou autre IP autorisée
-        return "Accès refusé", 403
-    # Tu peux aussi ajouter une authentification ici si besoin
-    return render_template('dev_monitor.html')
+    # Vérifier si la requête provient de localhost
+    if request.remote_addr == '127.0.0.1':
+        # Si la requête provient de localhost, on contourne la vérification du jeton
+        return jsonify({"message": "Accès autorisé depuis localhost sans jeton"})and render_template('dev_monitor.html')
+    
+    # Si la requête ne provient pas de localhost, on vérifie le jeton d'authentification
+    token = request.headers.get('Authorization')
+    if token:
+        if verify_token(token):
+            return jsonify({"message": "Accès autorisé avec jeton"})
+        else:
+            return jsonify({"error": "Jeton invalide"}), 401
+    else:
+        return jsonify({"error": "Jeton manquant"}), 401
+
 
 @app.route('/dashboard')
 def dashboard():

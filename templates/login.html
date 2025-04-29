@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Se connecter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
+
 <body>
     <h2>Connexion</h2>
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li class="alert alert-{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     <form action="{{ url_for('login') }}" method="POST">
         <label for="username">Nom d'utilisateur:</label><br>
         <input type="text" id="username" name="username" required><br><br>
@@ -12,5 +25,75 @@
         <input type="password" id="password" name="password" required><br><br>
         <input type="submit" value="Se connecter">
     </form>
+    <p>&copy; 2025 File Analyse Tous droits réservés.</p>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();  // Empêcher le rechargement de la page
+
+            // Récupérer les données du formulaire
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Effectuer une requête POST pour obtenir le jeton JWT
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.access_token) {
+                        // Sauvegarder le jeton JWT dans le localStorage ou sessionStorage
+                        localStorage.setItem('jwt_token', data.access_token);
+
+                        // Afficher un message ou rediriger l'utilisateur
+                        alert('Connexion réussie!');
+                        window.location.href = '/homepage'; // Rediriger vers la page d'accueil après connexion réussie
+                    } else {
+                        alert('Échec de la connexion');
+                    }
+                });
+        });
+
+        // Vérifier la présence du jeton JWT avant de charger /dev_monitor
+        function checkAuthForDevMonitor() {
+            const token = localStorage.getItem('jwt_token');
+            if (!token) {
+                alert('Vous devez vous connecter pour accéder au tableau de bord.');
+                window.location.href = '/login';
+                return;
+            }
+
+            // Effectuer la requête vers /dev_monitor en ajoutant le jeton JWT
+            fetch('/dev_monitor', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    if (error.response && error.response.status === 401) {
+                        alert('Votre jeton est expiré ou invalide. Veuillez vous reconnecter.');
+                        window.location.href = '/login.html';
+                    }
+                });
+        }
+
+        // Appeler cette fonction lorsque vous voulez accéder à la page /dev_monitor
+        checkAuthForDevMonitor();
+
+
+    </script>
 </body>
+
 </html>

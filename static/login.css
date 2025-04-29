@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@700&display=swap');
+
+/* Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+/* Formulaire de connexion */
+form {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  color: white;
+}
+
+h2 {
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+label {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  text-align: left;
+  display: block;
+  color: #fff;
+}
+
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  margin: 8px 0 20px 0;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+input[type="submit"] {
+  background-color: #00ffe1;
+  color: #0e0e0e;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 10px #00ffe1, 0 0 20px #00ffe1;
+}
+
+input[type="submit"]:hover {
+  background-color: #00c9ff;
+  transform: scale(1.05);
+}
+
+/* Lien de réinitialisation de mot de passe ou autre */
+a {
+  color: #00ffe1;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  margin-top: 15px;
+  display: inline-block;
+}
+
+a:hover {
+  color: #00c9ff;
+}
+
+/* Footer ou autres éléments */
+footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
+  form {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  input[type="submit"] {
+    font-size: 1rem;
+  }
+}

@@ -12,6 +12,8 @@
   <nav class="navbar">
     <div class="logo">
       <a href="/">File Analyse</a>
+      <button onclick="window.location.href='/dev_monitor'" id="dev_monitor">Dev Monitor</button>
+
     </div>
     <ul class="nav-links">
       <li><a href="/">🏠Accueil</a></li>
@@ -28,26 +30,19 @@
 
   <div class="hero">
     <h1>Bienvenue sur File Analyse</h1>
-    <p>Êtes-vous un developpeur ou un utilisateur en quête de sécurité ? Si oui, cliquez sur le bouton correspondant et c'est parti pour plus de sécurité!</p>
+    <p>Êtes-vous un developpeur ou un utilisateur en quête de sécurité ? Si oui, cliquez sur le bouton correspondant et
+      c'est parti pour plus de sécurité!</p>
     <p>Avec File Analyse, la clé de votre sécurité ne sera jamais très loin de vous</p>
     <!-- Deux boutons pour rediriger -->
     <div class="button-container">
-      <button onclick="window.location.href='/login'" class="btn">🔍 Accéder à l'analyse de données
+      <button onclick="window.location.href='/analyze_data'" id="btn-dvlp" class="btn">🔍 Accéder à l'analyse de données
         (Développeurs)</button>
       <button onclick="window.location.href='/index'" class="btn">👤 Accéder à la page principale</button>
     </div>
   </div>
 
 
-  <script>const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-
-    // ✅ On utilise une classe sur le <body> pour faire les ajustements en CSS
-    menuToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
-      document.body.classList.toggle('menu-open');
-    });
-  </script>
+  <script src="{{ url_for('static', filename='scripts.js') }}"></script>
   <footer>
     <p>&copy; 2025 File Analyse Tous droits réservés.</p>
   </footer>
