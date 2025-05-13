@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+    <h2>Inscription</h2>
+
+    <!-- Affichage des messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li class="alert alert-{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('register') }}" method="POST">
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="email">Adresse e-mail :</label>
+        <input type="text" id="email" name="email" required>
+
+        <label for="entreprise">Entreprise :</label>
+        <input type="text" id="entreprise" name="entreprise" required>
+
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="confirm_password">Confirmer le mot de passe :</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+
+        <input type="submit" value="S'inscrire">
+    </form>
+
+    <a href="{{ url_for('login') }}">Déjà un compte ? Connectez-vous ici</a>
+
+    <footer>
+        <p>&copy; 2025 File Analyse Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

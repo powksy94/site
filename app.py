@@ -1,7 +1,7 @@
 from flask import Flask, flash,  request, render_template, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate  # Import de Migrate
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity,  verify_jwt_in_request
 import zipfile
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
@@ -54,14 +54,15 @@ class Log(db.Model):
 # Définition du modèle User avec SQLAlchemy
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    entreprise = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(50), nullable=False, default='user') # add role
+    role = db.Column(db.String(50), nullable=False, default='user')
 
     # Méthode pour vérifier le mot de passe haché
     def check_password(self, password):
         return check_password_hash(self.password, password)
-
 
 
 @app.route('/logs')
@@ -141,7 +142,7 @@ def get_domain_from_url(url):
     return domain
 
 # Ajout d'un utilisateur avec un mot de passe haché
-def add_user(username, password, role='user'):
+def add_user(username, password, email, entreprise, role='user'):
     # Vérifier si l'utilisateur existe déjà
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
@@ -152,8 +153,8 @@ def add_user(username, password, role='user'):
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256:100000', salt_length=16)
 
     # Ajouter l'utilisateur
-    new_user = User(username=username, password=hashed_password, role=role)
-    db.session.add(new_user)
+    user = User(username=username, email=email, entreprise=entreprise, password=hashed_password, role=role)
+    db.session.add(user)
     db.session.commit()
     print(f"Utilisateur '{username}' créé avec succès !")
 
@@ -172,20 +173,21 @@ def verify_user(username, password):
 # Initialisation de la base de données
 with app.app_context():
     # Exemple d'ajout d'un utilisateur
-    add_user('admin', 'password123', role='admin')
-    add_user('jean', 'monmotdepasse')
+    add_user('admin', 'password123', 'example@gmail.com', 'Twitter')
     db.create_all()
     
 
 
-# Exemple de vérification du mot de passe
-username = 'admin'
-password = 'password123'
+    # Exemple de vérification du mot de passe
+    username = 'admin'
+    password = 'password123'
 
-if verify_user(username, password):
-    print("Le mot de passe est correct!")
-else:
-    print("Le mot de passe est incorrect!")
+    user = User.query.filter_by(username=username).first()
+
+    if user and check_password_hash(user.password, password):
+        print("Le mot de passe est correct!")
+    else:
+        print("Le mot de passe est incorrect!")
 
 # Endpoint pour se connecter et obtenir un jeton JWT
 @app.route('/login', methods=['GET', 'POST'])
@@ -226,8 +228,35 @@ def login():
 def login_page():
     return render_template('login.html')
 
-from flask import request, jsonify, render_template
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        entreprise = request.form['entreprise']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # Vérification des champs
+        if password != confirm_password:
+            flash('Les mots de passe ne correspondent pas.', 'danger')
+            return redirect(url_for('register'))
+
+        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+        if existing_user:
+            flash("Nom d'utilisateur ou e-mail déjà utilisé.", 'danger')
+            return redirect(url_for('register'))
+
+        # Création de l'utilisateur
+        hashed_password = generate_password_hash(password)
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Inscription réussie. Vous pouvez maintenant vous connecter.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
 
 @app.route('/analyze_data')
 def analyze_data():
